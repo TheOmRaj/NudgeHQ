@@ -185,6 +185,27 @@ export const gmailRouter = createTRPCRouter({
       }
     }),
 
+  setupWatch: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      try {
+        // @ts-ignore
+        const tenant = ctx.corsair.withTenant("default");
+        // @ts-ignore
+        const result = await tenant.gmail.api.users.watch({
+          userId: "me",
+          requestBody: {
+            topicName: "projects/nudgehq-499320/topics/gmail-push-notifications",
+            labelIds: ["INBOX"],
+          },
+        });
+        console.log("[gmail.setupWatch] Watch set:", result);
+        return { success: true, result };
+      } catch (err) {
+        console.error("[gmail.setupWatch] error:", err);
+        throw err;
+      }
+    }),
+
   search: protectedProcedure
     .input(z.object({ query: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
