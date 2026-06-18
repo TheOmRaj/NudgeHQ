@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     const { threadId, from, fromEmail, subject, proposedStart, proposedEnd } = body;
     // @ts-ignore
-    const tenant = corsair.withTenant("default");
+    const tenant = corsair.withTenant(userId);
     const results: Record<string, unknown> = {};
     const errors: Record<string, string> = {};
 
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
           threadId,
         });
         // @ts-ignore
-        await tenant.gmail.api.drafts.create({ draft: { message: { raw: rawEmail, threadId } } });
+        await tenant.gmail.api.drafts.create({ message: { raw: rawEmail, threadId } });
         results.gmail = { rescheduleDraft: true };
       } catch (err) {
         console.error("[flow3] gmail error:", err);
@@ -86,10 +86,7 @@ export async function POST(req: NextRequest) {
       // @ts-ignore
       await tenant.slack.api.messages.post({
         channel: process.env.SLACK_CHANNEL_ID!,
-        text: `⚡ *Flow 3 triggered*
-*Meeting invite from:* ${from}
-*Subject:* ${subject}
-*Conflict detected:* ${hasConflict ? "Yes ⚠️" : "No ✓"}`,
+        text: `⚡ *Flow 3 triggered*\n*Meeting invite from:* ${from}\n*Subject:* ${subject}\n*Conflict detected:* ${hasConflict ? "Yes ⚠️" : "No ✓"}`,
         mrkdwn: true,
       });
       results.slack = { notified: true };

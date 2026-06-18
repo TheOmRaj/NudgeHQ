@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     const { threadId, from, fromEmail, subject, snippet, daysSinceEmail = 3 } = body;
     // @ts-ignore
-    const tenant = corsair.withTenant("default");
+    const tenant = corsair.withTenant(userId);
     const results: Record<string, unknown> = {};
     const errors: Record<string, string> = {};
 
@@ -42,15 +42,9 @@ export async function POST(req: NextRequest) {
       await tenant.notion.api.databasePages.createDatabasePage({
         database_id: "38117f0d3c318091aca8e1cdac5e0113",
         properties: {
-          Status: {
-            title: [{ text: { content: `Follow-up: ${subject}` } }],
-          },
-          From: {
-            rich_text: [{ text: { content: `${from} <${fromEmail}>` } }],
-          },
-          Subject: {
-            rich_text: [{ text: { content: subject } }],
-          },
+          Status: { title: [{ text: { content: `Follow-up: ${subject}` } }] },
+          From: { rich_text: [{ text: { content: `${from} <${fromEmail}>` } }] },
+          Subject: { rich_text: [{ text: { content: subject } }] },
         },
       });
       results.notion = { logged: true };
@@ -93,11 +87,7 @@ export async function POST(req: NextRequest) {
       });
       // @ts-ignore
       await tenant.gmail.api.drafts.create({
-        draft: {
-          message: {
-            raw: rawEmail,
-          },
-        },
+        message: { raw: rawEmail },
       });
       results.gmail = { followUpDraft: true };
     } catch (err) {
@@ -110,11 +100,7 @@ export async function POST(req: NextRequest) {
       // @ts-ignore
       await tenant.slack.api.messages.post({
         channel: process.env.SLACK_CHANNEL_ID!,
-        text: `⚡ *Flow 2 triggered*
-*No reply from:* ${from} <${fromEmail}>
-*Subject:* ${subject}
-*After:* ${daysSinceEmail} days
-*Actions:* Notion logged ✓ · Calendar reminder ✓ · Follow-up draft ✓`,
+        text: `⚡ *Flow 2 triggered*\n*No reply from:* ${from} <${fromEmail}>\n*Subject:* ${subject}\n*After:* ${daysSinceEmail} days\n*Actions:* Notion logged ✓ · Calendar reminder ✓ · Follow-up draft ✓`,
         mrkdwn: true,
       });
       results.slack = { notified: true };

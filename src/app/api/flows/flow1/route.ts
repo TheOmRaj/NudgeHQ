@@ -2,7 +2,6 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { corsair } from "~/server/corsair";
 
-// Build RFC 2822 email and base64url encode it for Gmail API
 function buildRawEmail({ to, subject, body, threadId }: {
   to: string; subject: string; body: string; threadId?: string;
 }): string {
@@ -15,7 +14,6 @@ function buildRawEmail({ to, subject, body, threadId }: {
     body,
   ];
   const raw = lines.join("\r\n");
-  // base64url encode (URL-safe, no padding)
   return Buffer.from(raw)
     .toString("base64")
     .replace(/\+/g, "-")
@@ -43,7 +41,7 @@ export async function POST(req: NextRequest) {
     const { threadId, from, fromEmail, subject, snippet } = body;
 
     // @ts-ignore
-    const tenant = corsair.withTenant("default");
+    const tenant = corsair.withTenant(userId);
     const results: Record<string, unknown> = {};
     const errors: Record<string, string> = {};
 
@@ -75,11 +73,9 @@ export async function POST(req: NextRequest) {
 
       // @ts-ignore
       const draft = await tenant.gmail.api.drafts.create({
-        draft: {
-          message: {
-            raw: rawEmail,
-            threadId,
-          },
+        message: {
+          raw: rawEmail,
+          threadId,
         },
       });
       results.gmail = { draftId: draft.id };
@@ -116,10 +112,7 @@ export async function POST(req: NextRequest) {
       // @ts-ignore
       await tenant.slack.api.messages.post({
         channel: process.env.SLACK_CHANNEL_ID!,
-        text: `⚡ *Flow 1 triggered*
-*From:* ${from} <${fromEmail}>
-*Subject:* ${subject}
-*Actions:* Todoist task ✓ · Gmail draft ✓ · Calendar blocked ✓`,
+        text: `⚡ *Flow 1 triggered*\n*From:* ${from} <${fromEmail}>\n*Subject:* ${subject}\n*Actions:* Todoist task ✓ · Gmail draft ✓ · Calendar blocked ✓`,
         mrkdwn: true,
       });
       results.slack = { notified: true };

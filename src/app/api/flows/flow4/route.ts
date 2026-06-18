@@ -12,9 +12,9 @@ export async function POST(req: NextRequest) {
       subject: string; attachmentName: string; attachmentId: string;
     };
 
-    const { from, fromEmail, subject, attachmentName, attachmentId, messageId } = body;
+    const { from, fromEmail, subject, attachmentName, messageId } = body;
     // @ts-ignore
-    const tenant = corsair.withTenant("default");
+    const tenant = corsair.withTenant(userId);
     const results: Record<string, unknown> = {};
     const errors: Record<string, string> = {};
 
@@ -49,7 +49,6 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         console.error("[flow4] drive error:", err);
         errors.drive = err instanceof Error ? err.message : "Failed";
-        // Mark as pending even if drive fails
         results.drive = { pending: true, filename: attachmentName };
       }
     } else {
@@ -61,10 +60,7 @@ export async function POST(req: NextRequest) {
       // @ts-ignore
       await tenant.slack.api.messages.post({
         channel: process.env.SLACK_CHANNEL_ID!,
-        text: `⚡ *Flow 4 triggered*
-*Attachment from:* ${from} <${fromEmail}>
-*File:* ${attachmentName}
-*Saved to Drive:* ${attachmentData ? "✓" : "Pending"}`,
+        text: `⚡ *Flow 4 triggered*\n*Attachment from:* ${from} <${fromEmail}>\n*File:* ${attachmentName}\n*Saved to Drive:* ${attachmentData ? "✓" : "Pending"}`,
         mrkdwn: true,
       });
       results.slack = { notified: true };
