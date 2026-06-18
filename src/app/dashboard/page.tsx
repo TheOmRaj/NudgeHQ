@@ -578,6 +578,17 @@ function CommandPalette({ open, onClose, emails }: { open: boolean; onClose: () 
 
 export default function Dashboard() {
   const router = useRouter();
+
+  // Redirect to /connect if user hasn't connected their Gmail yet
+  const { data: connectStatus } = api.connect.status.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+  });
+  useEffect(() => {
+    if (connectStatus && !connectStatus.connected) {
+      router.push("/connect");
+    }
+  }, [connectStatus, router]);
+
   const [emails, setEmails] = useState<Email[]>([]);
   const [selected, setSelected] = useState<Email | null>(null);
   const [calEvents, setCalEvents] = useState<CalEvent[]>([]);

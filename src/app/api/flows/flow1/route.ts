@@ -15,7 +15,6 @@ function buildRawEmail({ to, subject, body, threadId }: {
     body,
   ];
   const raw = lines.join("\r\n");
-  // base64url encode (URL-safe, no padding)
   return Buffer.from(raw)
     .toString("base64")
     .replace(/\+/g, "-")
@@ -43,7 +42,7 @@ export async function POST(req: NextRequest) {
     const { threadId, from, fromEmail, subject, snippet } = body;
 
     // @ts-ignore
-    const tenant = corsair.withTenant("default");
+    const tenant = corsair.withTenant(userId);
     const results: Record<string, unknown> = {};
     const errors: Record<string, string> = {};
 

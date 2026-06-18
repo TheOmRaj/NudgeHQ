@@ -12,8 +12,10 @@ export const gmailRouter = createTRPCRouter({
     }))
     .query(async ({ ctx, input }) => {
       try {
+        console.log("USER ID:", ctx.userId);
+
         // @ts-ignore
-        const tenant = ctx.corsair.withTenant("default");
+        const tenant = ctx.corsair.withTenant(ctx.userId!);
 
         // @ts-ignore
         const listResult = await tenant.gmail.api.messages.list({
@@ -24,7 +26,6 @@ export const gmailRouter = createTRPCRouter({
         const messageStubs = listResult?.messages ?? [];
         if (messageStubs.length === 0) return { emails: [] };
 
-        // Fetch full message for each stub in parallel
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const fullMessages = await Promise.all(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -112,7 +113,7 @@ export const gmailRouter = createTRPCRouter({
       try {
         // @ts-ignore
         const msg = await ctx.corsair
-          .withTenant("default")
+          .withTenant(ctx.userId!)
           .gmail.api.messages.get({ id: input.id, format: "full" });
 
         const headers: Record<string, string> = {};
@@ -151,7 +152,7 @@ export const gmailRouter = createTRPCRouter({
       try {
         // @ts-ignore
         const draft = await ctx.corsair
-          .withTenant("default")
+          .withTenant(ctx.userId!)
           .gmail.api.drafts.create({
             message: {
               threadId: input.threadId,
@@ -173,7 +174,7 @@ export const gmailRouter = createTRPCRouter({
       try {
         // @ts-ignore
         await ctx.corsair
-          .withTenant("default")
+          .withTenant(ctx.userId!)
           .gmail.api.messages.modify({
             id: input.messageId,
             removeLabelIds: ["UNREAD"],
@@ -189,7 +190,7 @@ export const gmailRouter = createTRPCRouter({
     .mutation(async ({ ctx }) => {
       try {
         // @ts-ignore
-        const tenant = ctx.corsair.withTenant("default");
+        const tenant = ctx.corsair.withTenant(ctx.userId!);
         // @ts-ignore
         const result = await tenant.gmail.api.users.watch({
           userId: "me",
@@ -211,7 +212,7 @@ export const gmailRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         // @ts-ignore
-        const tenant = ctx.corsair.withTenant("default");
+        const tenant = ctx.corsair.withTenant(ctx.userId!);
 
         // @ts-ignore
         const listResult = await tenant.gmail.api.messages.list({

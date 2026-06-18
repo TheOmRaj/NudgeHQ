@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
     const { from, fromEmail, subject, attachmentName, attachmentId, messageId } = body;
     // @ts-ignore
-    const tenant = corsair.withTenant("default");
+    const tenant = corsair.withTenant(userId);
     const results: Record<string, unknown> = {};
     const errors: Record<string, string> = {};
 
@@ -49,7 +49,6 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         console.error("[flow4] drive error:", err);
         errors.drive = err instanceof Error ? err.message : "Failed";
-        // Mark as pending even if drive fails
         results.drive = { pending: true, filename: attachmentName };
       }
     } else {

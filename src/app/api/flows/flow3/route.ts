@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     const { threadId, from, fromEmail, subject, proposedStart, proposedEnd } = body;
     // @ts-ignore
-    const tenant = corsair.withTenant("default");
+    const tenant = corsair.withTenant(userId);
     const results: Record<string, unknown> = {};
     const errors: Record<string, string> = {};
 

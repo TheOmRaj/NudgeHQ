@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     const { threadId, from, fromEmail, subject, snippet, daysSinceEmail = 3 } = body;
     // @ts-ignore
-    const tenant = corsair.withTenant("default");
+    const tenant = corsair.withTenant(userId);
     const results: Record<string, unknown> = {};
     const errors: Record<string, string> = {};
 
