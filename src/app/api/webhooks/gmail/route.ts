@@ -13,7 +13,7 @@ import Groq from "groq-sdk";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// @ts-ignore
 const corsair = createCorsair({
   multiTenancy: true,
   database: pool,
