@@ -24,7 +24,7 @@ const PLUGINS = [
   },
 ];
 
-export default function ConnectPage() {
+function ConnectPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -204,5 +204,14 @@ export default function ConnectPage() {
         Your credentials are encrypted and stored securely. NudgeHQ never stores your emails.
       </p>
     </div>
+  );
+}
+
+import { Suspense } from "react";
+export default function ConnectPage() {
+  return (
+    <Suspense fallback={null}>
+      <ConnectPageInner />
+    </Suspense>
   );
 }
