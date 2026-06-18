@@ -14,7 +14,7 @@ export const calendarRouter = createTRPCRouter({
 
         // @ts-ignore
         const result = await ctx.corsair
-          .withTenant(ctx.userId)
+          .withTenant("default")
           .googlecalendar.api.events.getMany({
             calendarId: "primary",
             timeMin: startOfDay.toISOString(),
@@ -63,7 +63,7 @@ export const calendarRouter = createTRPCRouter({
 
         // @ts-ignore
         const event = await ctx.corsair
-          .withTenant(ctx.userId)
+          .withTenant("default")
           .googlecalendar.api.events.create({
             calendarId: "primary",
             summary: input.title,
